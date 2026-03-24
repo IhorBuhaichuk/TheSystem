@@ -3,12 +3,14 @@ package com.ihor.thesystem.data.local.room.database
 import androidx.room.Database
 import androidx.room.RoomDatabase
 import androidx.room.TypeConverters
+import androidx.sqlite.db.SupportSQLiteDatabase
 import com.ihor.thesystem.data.local.room.converters.Converters
 import com.ihor.thesystem.data.local.room.dao.*
 import com.ihor.thesystem.data.local.room.entity.*
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
+import javax.inject.Provider
 
 @Database(
     entities = [
@@ -45,13 +47,13 @@ abstract class AppDatabase : RoomDatabase() {
 
     class PopulateCallback(
         private val scope: CoroutineScope,
-        private val databaseProvider: () -> AppDatabase
+        private val databaseProvider: Provider<AppDatabase>
     ) : RoomDatabase.Callback() {
 
-        override fun onCreate(db: androidx.sqlite.db.SupportSQLiteDatabase) {
+        override fun onCreate(db: SupportSQLiteDatabase) {
             super.onCreate(db)
             scope.launch(Dispatchers.IO) {
-                val database = databaseProvider()
+                val database = databaseProvider.get()
                 DatabasePopulator.populate(
                     playerDao            = database.playerDao(),
                     systemConfigDao      = database.systemConfigDao(),

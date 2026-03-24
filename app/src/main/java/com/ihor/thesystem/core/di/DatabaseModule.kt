@@ -2,6 +2,7 @@ package com.ihor.thesystem.core.di
 
 import android.content.Context
 import androidx.room.Room
+import androidx.room.RoomDatabase
 import com.ihor.thesystem.data.local.room.database.AppDatabase
 import dagger.Module
 import dagger.Provides
@@ -9,7 +10,9 @@ import dagger.hilt.InstallIn
 import dagger.hilt.android.qualifiers.ApplicationContext
 import dagger.hilt.components.SingletonComponent
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
+import javax.inject.Provider
 import javax.inject.Singleton
 
 @Module
@@ -18,20 +21,25 @@ object DatabaseModule {
 
     @Provides
     @Singleton
-    fun provideCoroutineScope(): CoroutineScope = CoroutineScope(SupervisorJob())
+    fun provideCoroutineScope(): CoroutineScope = CoroutineScope(SupervisorJob() + Dispatchers.IO)
+
+    // Використовуємо Provider для безпечного розірвання циклічної залежності
+    @Provides
+    @Singleton
+    fun provideRoomDatabaseCallback(
+        databaseProvider: Provider<AppDatabase>,
+        scope: CoroutineScope
+    ): RoomDatabase.Callback {
+        return AppDatabase.PopulateCallback(scope, databaseProvider)
+    }
 
     @Provides
     @Singleton
     fun provideDatabase(
         @ApplicationContext context: Context,
-        scope: CoroutineScope
+        callback: RoomDatabase.Callback
     ): AppDatabase {
-        lateinit var db: AppDatabase
-        val callback = AppDatabase.PopulateCallback(
-            scope            = scope,
-            databaseProvider = { db }
-        )
-        db = Room.databaseBuilder(
+        return Room.databaseBuilder(
             context,
             AppDatabase::class.java,
             "the_system_db"
@@ -39,7 +47,6 @@ object DatabaseModule {
             .addCallback(callback)
             .fallbackToDestructiveMigration()
             .build()
-        return db
     }
 
     @Provides fun providePlayerDao(db: AppDatabase)            = db.playerDao()
