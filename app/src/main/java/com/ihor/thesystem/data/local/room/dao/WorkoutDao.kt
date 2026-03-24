@@ -37,6 +37,12 @@ interface WorkoutDao {
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insertCrossRef(crossRef: WorkoutExerciseCrossRef)
 
+    @Query("SELECT name FROM exercise WHERE id = :id")
+    suspend fun getExerciseNameById(id: Int): String?
+
+    @Query("SELECT * FROM exercise WHERE id = :id")
+    suspend fun getExerciseById(id: Int): ExerciseEntity?
+
     @Delete
     suspend fun deleteTemplate(template: WorkoutTemplateEntity)
 }

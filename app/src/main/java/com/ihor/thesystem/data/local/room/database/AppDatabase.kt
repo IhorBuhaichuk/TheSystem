@@ -43,13 +43,15 @@ abstract class AppDatabase : RoomDatabase() {
     abstract fun debuffConfigDao(): DebuffConfigDao
     abstract fun questLogDao(): QuestLogDao
 
-    // Callback для початкового заповнення БД
-    class PopulateCallback(private val scope: CoroutineScope) : RoomDatabase.Callback() {
-        lateinit var database: AppDatabase
+    class PopulateCallback(
+        private val scope: CoroutineScope,
+        private val databaseProvider: () -> AppDatabase
+    ) : RoomDatabase.Callback() {
 
         override fun onCreate(db: androidx.sqlite.db.SupportSQLiteDatabase) {
             super.onCreate(db)
             scope.launch(Dispatchers.IO) {
+                val database = databaseProvider()
                 DatabasePopulator.populate(
                     playerDao            = database.playerDao(),
                     systemConfigDao      = database.systemConfigDao(),

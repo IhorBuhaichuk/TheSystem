@@ -1,4 +1,4 @@
-package com.ihor.thesystem.feature.status.ui.components
+package com.ihor.thesystem.feature.statistics.ui.components
 
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.combinedClickable

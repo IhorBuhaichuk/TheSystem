@@ -1,4 +1,4 @@
-package com.ihor.thesystem.feature.status.ui.components.dialogs
+package com.ihor.thesystem.feature.statistics.ui.components.dialogs
 
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn

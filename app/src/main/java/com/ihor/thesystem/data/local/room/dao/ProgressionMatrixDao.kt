@@ -17,4 +17,7 @@ interface ProgressionMatrixDao {
 
     @Update
     suspend fun update(entry: ProgressionMatrixEntity)
+
+    @Query("SELECT * FROM progression_matrix WHERE exerciseId = :exerciseId LIMIT 1")
+    suspend fun getEntryForExerciseSync(exerciseId: Int): ProgressionMatrixEntity?
 }

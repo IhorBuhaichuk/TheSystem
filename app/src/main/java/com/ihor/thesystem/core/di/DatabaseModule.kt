@@ -26,8 +26,12 @@ object DatabaseModule {
         @ApplicationContext context: Context,
         scope: CoroutineScope
     ): AppDatabase {
-        val callback = AppDatabase.PopulateCallback(scope)
-        val db = Room.databaseBuilder(
+        lateinit var db: AppDatabase
+        val callback = AppDatabase.PopulateCallback(
+            scope            = scope,
+            databaseProvider = { db }
+        )
+        db = Room.databaseBuilder(
             context,
             AppDatabase::class.java,
             "the_system_db"
@@ -35,7 +39,6 @@ object DatabaseModule {
             .addCallback(callback)
             .fallbackToDestructiveMigration()
             .build()
-        callback.database = db
         return db
     }
 

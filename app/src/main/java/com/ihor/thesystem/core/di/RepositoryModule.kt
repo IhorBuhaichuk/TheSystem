@@ -26,4 +26,9 @@ abstract class RepositoryModule {
 
     @Binds @Singleton
     abstract fun bindScheduleRepository(impl: ScheduleRepositoryImpl): ScheduleRepository
+
+    @Binds @Singleton
+    abstract fun bindProgressionMatrixRepository(
+        impl: ProgressionMatrixRepositoryImpl
+    ): ProgressionMatrixRepository
 }

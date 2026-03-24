@@ -10,7 +10,7 @@ import com.ihor.thesystem.core.theme.BackgroundDeep
 import com.ihor.thesystem.core.ui.components.SystemBottomNavBar
 import com.ihor.thesystem.feature.mode.ui.ModeScreen
 import com.ihor.thesystem.feature.statistics.ui.StatisticsScreen
-import com.ihor.thesystem.feature.status.ui.StatusScreen
+import com.ihor.thesystem.feature.statistics.ui.StatusScreen
 import androidx.compose.foundation.layout.padding
 
 @Composable

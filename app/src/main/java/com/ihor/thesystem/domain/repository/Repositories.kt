@@ -34,3 +34,20 @@ interface DebuffRepository {
 interface ScheduleRepository {
     fun getScheduleForDay(day: Int): Flow<ScheduleDay?>
 }
+
+interface ProgressionMatrixRepository {
+    fun getAllEntries(): Flow<List<ProgressionMatrixEntry>>
+    suspend fun updateCurrentWeight(exerciseId: Int, newWeight: Float)
+}
+
+data class ProgressionMatrixEntry(
+    val id: Int,
+    val exerciseId: Int,
+    val exerciseName: String,
+    val startWeight: Float,
+    val targetWeight: Float,
+    val currentWeight: Float,
+    val targetWeightNote: String?,
+    val weeklyStep: Float,          // розраховується в UseCase
+    val progressPercent: Float      // 0f..1f
+)
