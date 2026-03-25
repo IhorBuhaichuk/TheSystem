@@ -16,14 +16,14 @@ class ValidateDirectivesUseCase @Inject constructor() {
         return runCatching {
             directives.map { directive ->
                 // Шукаємо ліміти для конкретної вправи у матриці прогресії
-                val matrixEntry = matrix.find { it.exerciseId == directive.exerciseId }
+                val matrixEntry = matrix.find { it.exerciseId.toString() == directive.exerciseId }
 
                 if (matrixEntry != null) {
                     // Якщо вправа є в матриці, затискаємо вагу в її межах
                     directive.copy(
                         targetWeight = directive.targetWeight.coerceIn(
-                            minimumValue = matrixEntry.startWeight,
-                            maximumValue = matrixEntry.targetWeight
+                            minimumValue = matrixEntry.startWeight.toDouble(),
+                            maximumValue = matrixEntry.targetWeight.toDouble()
                         ),
                         targetReps = directive.targetReps.coerceIn(1, 30),
                         targetSets = directive.targetSets.coerceAtLeast(1)

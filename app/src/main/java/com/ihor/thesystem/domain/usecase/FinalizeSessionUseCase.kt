@@ -79,10 +79,10 @@ class FinalizeSessionUseCase @Inject constructor(
     ): AiArchitectReport {
         // Резервний розрахунок на основі поточної матриці прогресії
         val fallbackDirectives = sets.map { set ->
-            val entry = matrix.find { it.exerciseId == set.exerciseId }
+            val entry = matrix.find { it.exerciseId.toString() == set.exerciseId }
             WorkoutDirective(
                 exerciseId = set.exerciseId,
-                targetWeight = entry?.startWeight ?: set.weight,
+                targetWeight = entry?.startWeight?.toDouble() ?: set.weight,
                 targetSets = 3, // Базові значення для резервного плану
                 targetReps = 10
             )
