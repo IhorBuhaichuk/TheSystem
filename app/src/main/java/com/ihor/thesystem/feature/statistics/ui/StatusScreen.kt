@@ -16,17 +16,19 @@ import androidx.navigation.NavHostController
 import com.ihor.thesystem.core.theme.*
 import com.ihor.thesystem.core.ui.UiState
 
-// --- ПРАВИЛЬНІ ІМПОРТИ З ПАКЕТА statistics ---
+// --- Імпорти з пакета statistics ---
 import com.ihor.thesystem.feature.statistics.ui.components.EmptyQuestCard
 import com.ihor.thesystem.feature.statistics.ui.components.PlayerLeftPanel
 import com.ihor.thesystem.feature.statistics.ui.components.QuestCard
 import com.ihor.thesystem.feature.statistics.ui.components.QuestCardType
 import com.ihor.thesystem.feature.statistics.ui.components.StatRightPanel
-import com.ihor.thesystem.feature.statistics.ui.components.SystemHeader
 import com.ihor.thesystem.feature.statistics.ui.components.dialogs.DebuffEditorSheet
 import com.ihor.thesystem.feature.statistics.ui.components.dialogs.EditNameDialog
 import com.ihor.thesystem.feature.statistics.ui.components.dialogs.LogWeightDialog
 import com.ihor.thesystem.feature.statistics.ui.components.dialogs.QuestChecklistSheet
+
+// --- ВИПРАВЛЕНИЙ ІМПОРТ: SystemHeader має пакет status всередині файлу ---
+import com.ihor.thesystem.feature.status.ui.components.SystemHeader
 
 // --- Імпорти локальних діалогів із status ---
 import com.ihor.thesystem.feature.status.ui.components.dialogs.LevelUpDialog
@@ -167,7 +169,7 @@ fun StatusScreen(
                         }
                     }
                     is StatusDialogState.EditSystemConfig -> {
-                        // Тимчасова заглушка для уникнення крашу через відсутність SystemConfigDialog або config
+                        // Тимчасова заглушка для уникнення крашу
                         viewModel.onDismissDialog()
                     }
                     StatusDialogState.None -> Unit
