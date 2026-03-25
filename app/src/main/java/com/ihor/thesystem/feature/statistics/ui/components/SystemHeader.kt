@@ -1,12 +1,13 @@
-package com.ihor.thesystem.feature.statistics.ui.components
+package com.ihor.thesystem.feature.status.ui.components
 
+import androidx.compose.animation.core.*
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
 import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material3.Text
-import androidx.compose.runtime.Composable
+import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontFamily
@@ -22,13 +23,24 @@ fun SystemHeader(
     modifier: Modifier = Modifier,
     onLongPress: () -> Unit = {}
 ) {
+    val dotAlpha by rememberInfiniteTransition(label = "dot")
+        .animateFloat(
+            initialValue  = 0.4f,
+            targetValue   = 1.0f,
+            animationSpec = infiniteRepeatable(
+                tween(1000, easing = EaseInOutSine),
+                RepeatMode.Reverse
+            ),
+            label = "dotAlpha"
+        )
+
     Row(
         modifier = modifier
             .fillMaxWidth()
             .padding(horizontal = 16.dp, vertical = 18.dp)
             .combinedClickable(onClick = {}, onLongClick = onLongPress),
         horizontalArrangement = Arrangement.Center,
-        verticalAlignment = Alignment.CenterVertically
+        verticalAlignment     = Alignment.CenterVertically
     ) {
         Text(
             text          = "СИСТЕМА v1.0",
@@ -42,8 +54,8 @@ fun SystemHeader(
         Box(
             modifier = Modifier
                 .size(9.dp)
-                .neonGlow(NeonCyan, radius = 6.dp)
-                .background(NeonCyan, CircleShape)
+                .neonGlow(NeonCyan.copy(alpha = dotAlpha), radius = 6.dp)
+                .background(NeonCyan.copy(alpha = dotAlpha), CircleShape)
         )
     }
 }

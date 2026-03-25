@@ -1,7 +1,6 @@
 package com.ihor.thesystem.domain.usecase
 
 import com.ihor.thesystem.domain.repository.PlayerRepository
-import com.ihor.thesystem.domain.repository.QuestLogRepository
 import kotlinx.coroutines.flow.firstOrNull
 import javax.inject.Inject
 

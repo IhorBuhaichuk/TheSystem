@@ -28,8 +28,8 @@ fun StatusScreen(
     val uiState      by viewModel.uiState.collectAsState()
     val dialogState  by viewModel.dialogState.collectAsState()
     val allDebuffs   by viewModel.allDebuffs.collectAsState()
+    val systemConfig by viewModel.systemConfig.collectAsState()
 
-    // ── One-off events ────────────────────────────────────────────────
     var levelUpEvent   by remember { mutableStateOf<StatusOneOffEvent.ShowLevelUp?>(null) }
     var showPenaltyOn  by remember { mutableStateOf(false) }
     var showPenaltyOff by remember { mutableStateOf(false) }
@@ -37,7 +37,7 @@ fun StatusScreen(
     LaunchedEffect(Unit) {
         viewModel.events.collect { event ->
             when (event) {
-                is StatusOneOffEvent.ShowLevelUp         -> levelUpEvent  = event
+                is StatusOneOffEvent.ShowLevelUp         -> levelUpEvent   = event
                 StatusOneOffEvent.ShowPenaltyActivated   -> showPenaltyOn  = true
                 StatusOneOffEvent.ShowPenaltyDeactivated -> showPenaltyOff = true
             }
@@ -51,7 +51,7 @@ fun StatusScreen(
             .verticalScroll(rememberScrollState())
     ) {
         SystemHeader(
-            onLongPress = { /* TODO: SystemConfig dialog — Phase 6 */ }
+            onLongPress = { viewModel.onSystemConfigTap() }
         )
 
         when (val state = uiState) {
@@ -97,7 +97,7 @@ fun StatusScreen(
                             quest       = quest,
                             type        = QuestCardType.DAILY,
                             onClick     = { viewModel.onQuestTap(quest.id, isDaily = true) },
-                            onLongClick = { /* TODO: редактор квесту */ }
+                            onLongClick = { }
                         )
                     } ?: EmptyQuestCard(QuestCardType.DAILY)
 
@@ -106,7 +106,7 @@ fun StatusScreen(
                             quest       = quest,
                             type        = QuestCardType.MAIN,
                             onClick     = { viewModel.onQuestTap(quest.id, isDaily = false) },
-                            onLongClick = { /* TODO: редактор квесту */ }
+                            onLongClick = { }
                         )
                     } ?: EmptyQuestCard(QuestCardType.MAIN)
 
@@ -135,6 +135,15 @@ fun StatusScreen(
                             onToggle  = { viewModel.onDebuffToggled(it) },
                             onDismiss = { viewModel.onDismissDialog() }
                         )
+                    }
+                    is StatusDialogState.EditSystemConfig -> {
+                        systemConfig?.let { config ->
+                            SystemConfigDialog(
+                                config    = config,
+                                onConfirm = { viewModel.onSystemConfigConfirmed(it) },
+                                onDismiss = { viewModel.onDismissDialog() }
+                            )
+                        }
                     }
                     is StatusDialogState.QuestChecklist -> {
                         val quest  = if (dialog.isDaily) data.dailyQuest else data.mainQuest

@@ -12,7 +12,8 @@ class SystemConfigRepositoryImpl @Inject constructor(
     private val dao: SystemConfigDao
 ) : SystemConfigRepository {
 
-    override fun getConfig(): Flow<SystemConfig?> = dao.getConfig().map { it?.toDomain() }
+    override fun getConfig(): Flow<SystemConfig?> =
+        dao.getConfig().map { it?.toDomain() }
 
     override suspend fun updateConfig(config: SystemConfig) =
         dao.insertOrUpdate(config.toEntity())

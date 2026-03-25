@@ -48,9 +48,9 @@ object UseCaseModule {
 
     @Provides @Singleton
     fun provideGetStatusScreenDataUseCase(
-        playerRepo:  PlayerRepository,
-        questRepo:   QuestRepository,
-        debuffRepo:  DebuffRepository
+        playerRepo: PlayerRepository,
+        questRepo:  QuestRepository,
+        debuffRepo: DebuffRepository
     ) = GetStatusScreenDataUseCase(playerRepo, questRepo, debuffRepo)
 
     @Provides @Singleton
@@ -62,4 +62,14 @@ object UseCaseModule {
     fun provideUpdateExerciseWeightUseCase(
         repo: ProgressionMatrixRepository
     ) = UpdateExerciseWeightUseCase(repo)
+
+    @Provides @Singleton
+    fun provideGetSystemConfigUseCase(
+        repo: SystemConfigRepository
+    ) = GetSystemConfigUseCase(repo)
+
+    @Provides @Singleton
+    fun provideUpdateSystemConfigUseCase(
+        repo: SystemConfigRepository
+    ) = UpdateSystemConfigUseCase(repo)
 }
