@@ -2,7 +2,7 @@ package com.ihor.thesystem.domain.usecase
 
 import com.ihor.thesystem.domain.model.AiArchitectReport
 import com.ihor.thesystem.domain.model.ExerciseSet
-import com.ihor.thesystem.domain.model.ProgressionMatrixEntry
+import com.ihor.thesystem.domain.repository.ProgressionMatrixEntry
 import com.ihor.thesystem.domain.model.WorkoutDirective
 import com.ihor.thesystem.domain.model.WorkoutSession
 import com.ihor.thesystem.domain.repository.AiArchitectRepository
@@ -35,10 +35,8 @@ class FinalizeSessionUseCase @Inject constructor(
             val currentSession = session.copy(sessionId = sessionId)
 
             // 2. Отримати матрицю прогресії
-            // УВАГА: Якщо метод отримання матриці у вашому репозиторії називається інакше
-            // (наприклад, getAllEntries), замініть getMatrixFlow() на правильну назву.
             val matrix = try {
-                progressionMatrixRepository.getMatrixFlow().first()
+                progressionMatrixRepository.getAllEntries().first()
             } catch (e: Exception) {
                 emptyList<ProgressionMatrixEntry>()
             }

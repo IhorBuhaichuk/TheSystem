@@ -1,6 +1,6 @@
 package com.ihor.thesystem.domain.usecase
 
-import com.ihor.thesystem.domain.model.ProgressionMatrixEntry
+import com.ihor.thesystem.domain.repository.ProgressionMatrixEntry
 import com.ihor.thesystem.domain.model.WorkoutDirective
 import javax.inject.Inject
 
