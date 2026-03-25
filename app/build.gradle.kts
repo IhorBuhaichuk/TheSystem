@@ -4,6 +4,7 @@ plugins {
     alias(libs.plugins.ksp)
     alias(libs.plugins.hilt)
     alias(libs.plugins.kotlin.compose)
+    alias(libs.plugins.kotlin.serialization)
 }
 
 android {
@@ -16,6 +17,9 @@ android {
         targetSdk = 35
         versionCode = 1
         versionName = "1.0"
+
+        val geminiKey = project.findProperty("geminiApiKey")?.toString() ?: ""
+        buildConfigField("String", "GEMINI_API_KEY", "\"$geminiKey\"")
     }
 
     buildTypes {
@@ -32,6 +36,7 @@ android {
     }
     buildFeatures {
         compose = true
+        buildConfig = true
     }
 }
 
@@ -58,6 +63,11 @@ dependencies {
     implementation(libs.navigation.compose)
     // Coroutines
     implementation(libs.kotlinx.coroutines.android)
+
+    // AI & Serialization
+    implementation(libs.generativeai)
+    implementation(libs.kotlinx.serialization.json)
+
     debugImplementation(libs.androidx.ui.tooling)
 }
 
