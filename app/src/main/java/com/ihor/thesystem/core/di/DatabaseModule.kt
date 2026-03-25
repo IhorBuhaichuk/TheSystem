@@ -3,7 +3,9 @@ package com.ihor.thesystem.core.di
 import android.content.Context
 import androidx.room.Room
 import androidx.room.RoomDatabase
+import androidx.sqlite.db.SupportSQLiteDatabase
 import com.ihor.thesystem.data.local.room.database.AppDatabase
+import com.ihor.thesystem.data.local.room.database.DatabasePopulator
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
@@ -12,7 +14,7 @@ import dagger.hilt.components.SingletonComponent
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
-import javax.inject.Provider
+import kotlinx.coroutines.launch
 import javax.inject.Singleton
 
 @Module
@@ -21,25 +23,29 @@ object DatabaseModule {
 
     @Provides
     @Singleton
-    fun provideCoroutineScope(): CoroutineScope = CoroutineScope(SupervisorJob() + Dispatchers.IO)
+    fun provideDatabase(@ApplicationContext context: Context): AppDatabase {
+        // Локальна змінна для уникнення Dagger Dependency Cycle та Kotlin closure errors
+        var db: AppDatabase? = null
 
-    // Використовуємо Provider для безпечного розірвання циклічної залежності
-    @Provides
-    @Singleton
-    fun provideRoomDatabaseCallback(
-        databaseProvider: Provider<AppDatabase>,
-        scope: CoroutineScope
-    ): RoomDatabase.Callback {
-        return AppDatabase.PopulateCallback(scope, databaseProvider)
-    }
+        val callback = object : RoomDatabase.Callback() {
+            override fun onCreate(sqliteDb: SupportSQLiteDatabase) {
+                super.onCreate(sqliteDb)
+                db?.let { database ->
+                    CoroutineScope(SupervisorJob() + Dispatchers.IO).launch {
+                        DatabasePopulator.populate(
+                            playerDao            = database.playerDao(),
+                            systemConfigDao      = database.systemConfigDao(),
+                            workoutDao           = database.workoutDao(),
+                            scheduleDao          = database.scheduleDao(),
+                            progressionMatrixDao = database.progressionMatrixDao(),
+                            debuffConfigDao      = database.debuffConfigDao()
+                        )
+                    }
+                }
+            }
+        }
 
-    @Provides
-    @Singleton
-    fun provideDatabase(
-        @ApplicationContext context: Context,
-        callback: RoomDatabase.Callback
-    ): AppDatabase {
-        return Room.databaseBuilder(
+        val database = Room.databaseBuilder(
             context,
             AppDatabase::class.java,
             "the_system_db"
@@ -47,6 +53,10 @@ object DatabaseModule {
             .addCallback(callback)
             .fallbackToDestructiveMigration()
             .build()
+
+        // Привласнення екземпляра після білда, але до виконання onCreate
+        db = database
+        return database
     }
 
     @Provides fun providePlayerDao(db: AppDatabase)            = db.playerDao()

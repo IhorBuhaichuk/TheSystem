@@ -1,8 +1,6 @@
 package com.ihor.thesystem.core.di
 
-import com.ihor.thesystem.domain.repository.PlayerRepository
-import com.ihor.thesystem.domain.repository.QuestRepository
-import com.ihor.thesystem.domain.repository.ScheduleRepository
+import com.ihor.thesystem.domain.repository.*
 import com.ihor.thesystem.domain.usecase.*
 import dagger.Module
 import dagger.Provides
@@ -16,22 +14,52 @@ object UseCaseModule {
 
     @Provides @Singleton
     fun provideGenerateDailyQuestsUseCase(
-        playerRepo: PlayerRepository,
-        questRepo: QuestRepository,
+        playerRepo:   PlayerRepository,
+        questRepo:    QuestRepository,
         scheduleRepo: ScheduleRepository
     ) = GenerateDailyQuestsUseCase(playerRepo, questRepo, scheduleRepo)
 
     @Provides @Singleton
-    fun provideAdvanceCycleDayUseCase(
+    fun provideLevelUpUseCase(
+        playerRepo: PlayerRepository
+    ) = LevelUpUseCase(playerRepo)
+
+    @Provides @Singleton
+    fun provideCheckPenaltyZoneUseCase(
         playerRepo: PlayerRepository,
-        questRepo: QuestRepository,
-        generateQuests: GenerateDailyQuestsUseCase
-    ) = AdvanceCycleDayUseCase(playerRepo, questRepo, generateQuests)
+        questRepo:  QuestRepository,
+        matrixRepo: ProgressionMatrixRepository
+    ) = CheckPenaltyZoneUseCase(playerRepo, questRepo, matrixRepo)
+
+    @Provides @Singleton
+    fun provideActivatePenaltyManuallyUseCase(
+        playerRepo: PlayerRepository,
+        matrixRepo: ProgressionMatrixRepository
+    ) = ActivatePenaltyManuallyUseCase(playerRepo, matrixRepo)
+
+    @Provides @Singleton
+    fun provideAdvanceCycleDayUseCase(
+        playerRepo:     PlayerRepository,
+        questRepo:      QuestRepository,
+        generateQuests: GenerateDailyQuestsUseCase,
+        levelUp:        LevelUpUseCase,
+        checkPenalty:   CheckPenaltyZoneUseCase
+    ) = AdvanceCycleDayUseCase(playerRepo, questRepo, generateQuests, levelUp, checkPenalty)
 
     @Provides @Singleton
     fun provideGetStatusScreenDataUseCase(
-        playerRepo: PlayerRepository,
-        questRepo: QuestRepository,
-        debuffRepo: com.ihor.thesystem.domain.repository.DebuffRepository
+        playerRepo:  PlayerRepository,
+        questRepo:   QuestRepository,
+        debuffRepo:  DebuffRepository
     ) = GetStatusScreenDataUseCase(playerRepo, questRepo, debuffRepo)
+
+    @Provides @Singleton
+    fun provideGetProgressionMatrixUseCase(
+        repo: ProgressionMatrixRepository
+    ) = GetProgressionMatrixUseCase(repo)
+
+    @Provides @Singleton
+    fun provideUpdateExerciseWeightUseCase(
+        repo: ProgressionMatrixRepository
+    ) = UpdateExerciseWeightUseCase(repo)
 }

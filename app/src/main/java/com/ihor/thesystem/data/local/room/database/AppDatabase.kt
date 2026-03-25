@@ -3,14 +3,9 @@ package com.ihor.thesystem.data.local.room.database
 import androidx.room.Database
 import androidx.room.RoomDatabase
 import androidx.room.TypeConverters
-import androidx.sqlite.db.SupportSQLiteDatabase
 import com.ihor.thesystem.data.local.room.converters.Converters
 import com.ihor.thesystem.data.local.room.dao.*
 import com.ihor.thesystem.data.local.room.entity.*
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.launch
-import javax.inject.Provider
 
 @Database(
     entities = [
@@ -28,6 +23,11 @@ import javax.inject.Provider
         ProgressionMatrixEntity::class,
         DebuffConfigEntity::class,
         QuestLogEntity::class
+        // ВАЖЛИВО: Якщо ти вже створював нові таблиці для ШІ,
+        // просто прибери подвійний слеш (//) перед їхніми назвами нижче:
+        // , WorkoutSessionLogEntity::class
+        // , ExerciseSetLogEntity::class
+        // , ExerciseMilestoneEntity::class
     ],
     version = 2,
     exportSchema = false
@@ -45,24 +45,9 @@ abstract class AppDatabase : RoomDatabase() {
     abstract fun debuffConfigDao(): DebuffConfigDao
     abstract fun questLogDao(): QuestLogDao
 
-    class PopulateCallback(
-        private val scope: CoroutineScope,
-        private val databaseProvider: Provider<AppDatabase>
-    ) : RoomDatabase.Callback() {
-
-        override fun onCreate(db: SupportSQLiteDatabase) {
-            super.onCreate(db)
-            scope.launch(Dispatchers.IO) {
-                val database = databaseProvider.get()
-                DatabasePopulator.populate(
-                    playerDao            = database.playerDao(),
-                    systemConfigDao      = database.systemConfigDao(),
-                    workoutDao           = database.workoutDao(),
-                    scheduleDao          = database.scheduleDao(),
-                    progressionMatrixDao = database.progressionMatrixDao(),
-                    debuffConfigDao      = database.debuffConfigDao()
-                )
-            }
-        }
-    }
+    // ВАЖЛИВО: Якщо ти вже створював нові DAO для ШІ,
+    // прибери подвійний слеш (//) перед ними:
+    // abstract fun workoutSessionLogDao(): WorkoutSessionLogDao
+    // abstract fun exerciseSetLogDao(): ExerciseSetLogDao
+    // abstract fun exerciseMilestoneDao(): ExerciseMilestoneDao
 }

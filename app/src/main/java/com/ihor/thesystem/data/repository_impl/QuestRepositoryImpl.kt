@@ -54,6 +54,9 @@ class QuestRepositoryImpl @Inject constructor(
             questDao.insertQuestTask(QuestTaskEntity(questId = questId, name = name))
         }
     }
+
+    override suspend fun getLastTwoMainQuestsStatus(): List<DomainQuestStatus> =
+        questDao.getLastTwoMainQuests().map { it.status.toDomain() }
 }
 
 // ── Type aliases to avoid naming clash ────────────────────────────────────────

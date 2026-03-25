@@ -18,6 +18,8 @@ interface QuestRepository {
     suspend fun updateQuestStatus(questId: Int, status: DomainQuestStatus)
     suspend fun createDailyQuest(title: String, tasks: List<String>, scheduleId: Int?)
     suspend fun createMainQuest(title: String, exercises: List<String>, scheduleId: Int?)
+
+    suspend fun getLastTwoMainQuestsStatus(): List<DomainQuestStatus>
 }
 
 interface SystemConfigRepository {

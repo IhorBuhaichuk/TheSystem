@@ -1,4 +1,4 @@
-package com.ihor.thesystem.feature.statistics.ui
+package com.ihor.thesystem.feature.status.ui
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
@@ -15,26 +15,34 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavHostController
 import com.ihor.thesystem.core.theme.*
 import com.ihor.thesystem.core.ui.UiState
-import com.ihor.thesystem.feature.statistics.ui.components.EmptyQuestCard
-import com.ihor.thesystem.feature.statistics.ui.components.PlayerLeftPanel
-import com.ihor.thesystem.feature.statistics.ui.components.QuestCard
-import com.ihor.thesystem.feature.statistics.ui.components.QuestCardType
-import com.ihor.thesystem.feature.statistics.ui.components.StatRightPanel
-import com.ihor.thesystem.feature.statistics.ui.components.SystemHeader
-import com.ihor.thesystem.feature.statistics.ui.components.dialogs.DebuffEditorSheet
-import com.ihor.thesystem.feature.statistics.ui.components.dialogs.EditNameDialog
-import com.ihor.thesystem.feature.statistics.ui.components.dialogs.LogWeightDialog
-import com.ihor.thesystem.feature.statistics.ui.components.dialogs.QuestChecklistSheet
+import com.ihor.thesystem.feature.status.ui.components.*
+import com.ihor.thesystem.feature.status.ui.components.dialogs.*
 import com.ihor.thesystem.feature.status.viewmodel.*
+import kotlinx.coroutines.flow.collect
 
 @Composable
 fun StatusScreen(
     navController: NavHostController,
     viewModel: StatusViewModel = hiltViewModel()
 ) {
-    val uiState     by viewModel.uiState.collectAsState()
-    val dialogState by viewModel.dialogState.collectAsState()
-    val allDebuffs  by viewModel.allDebuffs.collectAsState()
+    val uiState      by viewModel.uiState.collectAsState()
+    val dialogState  by viewModel.dialogState.collectAsState()
+    val allDebuffs   by viewModel.allDebuffs.collectAsState()
+
+    // ── One-off events ────────────────────────────────────────────────
+    var levelUpEvent   by remember { mutableStateOf<StatusOneOffEvent.ShowLevelUp?>(null) }
+    var showPenaltyOn  by remember { mutableStateOf(false) }
+    var showPenaltyOff by remember { mutableStateOf(false) }
+
+    LaunchedEffect(Unit) {
+        viewModel.events.collect { event ->
+            when (event) {
+                is StatusOneOffEvent.ShowLevelUp         -> levelUpEvent  = event
+                StatusOneOffEvent.ShowPenaltyActivated   -> showPenaltyOn  = true
+                StatusOneOffEvent.ShowPenaltyDeactivated -> showPenaltyOff = true
+            }
+        }
+    }
 
     Column(
         modifier = Modifier
@@ -43,13 +51,13 @@ fun StatusScreen(
             .verticalScroll(rememberScrollState())
     ) {
         SystemHeader(
-            onLongPress = { /* TODO: SystemConfig dialog — Phase 3 */ }
+            onLongPress = { /* TODO: SystemConfig dialog — Phase 6 */ }
         )
 
         when (val state = uiState) {
             is UiState.Loading -> {
                 Box(
-                    modifier = Modifier.fillMaxWidth().height(300.dp),
+                    modifier         = Modifier.fillMaxWidth().height(300.dp),
                     contentAlignment = Alignment.Center
                 ) { CircularProgressIndicator(color = NeonCyan) }
             }
@@ -64,16 +72,16 @@ fun StatusScreen(
                     horizontalArrangement = Arrangement.spacedBy(8.dp)
                 ) {
                     PlayerLeftPanel(
-                        data = data,
-                        modifier = Modifier.weight(0.60f),
-                        onNameTap = { viewModel.onNameTap() },
+                        data         = data,
+                        modifier     = Modifier.weight(0.60f),
+                        onNameTap    = { viewModel.onNameTap() },
                         onDebuffEdit = { viewModel.onDebuffTap() }
                     )
                     StatRightPanel(
-                        month = "${data.currentMonth}/${data.totalMonths}",
-                        weight = "${data.currentWeight.toInt()}",
-                        height = "${data.height.toInt()}",
-                        modifier = Modifier.weight(0.40f),
+                        month       = "${data.currentMonth}/${data.totalMonths}",
+                        weight      = "${data.currentWeight.toInt()}",
+                        height      = "${data.height.toInt()}",
+                        modifier    = Modifier.weight(0.40f),
                         onWeightTap = { viewModel.onWeightTap() }
                     )
                 }
@@ -86,18 +94,18 @@ fun StatusScreen(
                 ) {
                     data.dailyQuest?.let { quest ->
                         QuestCard(
-                            quest = quest,
-                            type = QuestCardType.DAILY,
-                            onClick = { viewModel.onQuestTap(quest.id, isDaily = true) },
+                            quest       = quest,
+                            type        = QuestCardType.DAILY,
+                            onClick     = { viewModel.onQuestTap(quest.id, isDaily = true) },
                             onLongClick = { /* TODO: редактор квесту */ }
                         )
                     } ?: EmptyQuestCard(QuestCardType.DAILY)
 
                     data.mainQuest?.let { quest ->
                         QuestCard(
-                            quest = quest,
-                            type = QuestCardType.MAIN,
-                            onClick = { viewModel.onQuestTap(quest.id, isDaily = false) },
+                            quest       = quest,
+                            type        = QuestCardType.MAIN,
+                            onClick     = { viewModel.onQuestTap(quest.id, isDaily = false) },
                             onLongClick = { /* TODO: редактор квесту */ }
                         )
                     } ?: EmptyQuestCard(QuestCardType.MAIN)
@@ -105,58 +113,50 @@ fun StatusScreen(
                     Spacer(Modifier.height(6.dp))
                 }
 
-                // ── Dialogs ───────────────────────────────────────────────────
+                // ── Dialogs ───────────────────────────────────────────
                 when (val dialog = dialogState) {
-
                     is StatusDialogState.EditName -> {
                         EditNameDialog(
                             currentName = data.playerName,
-                            onConfirm = { viewModel.onNameConfirmed(it) },
-                            onDismiss = { viewModel.onDismissDialog() }
+                            onConfirm   = { viewModel.onNameConfirmed(it) },
+                            onDismiss   = { viewModel.onDismissDialog() }
                         )
                     }
-
                     is StatusDialogState.LogWeight -> {
                         LogWeightDialog(
                             currentWeight = data.currentWeight,
-                            onConfirm = { viewModel.onWeightConfirmed(it) },
-                            onDismiss = { viewModel.onDismissDialog() }
+                            onConfirm     = { viewModel.onWeightConfirmed(it) },
+                            onDismiss     = { viewModel.onDismissDialog() }
                         )
                     }
-
                     is StatusDialogState.EditDebuffs -> {
                         DebuffEditorSheet(
-                            debuffs = allDebuffs,
-                            onToggle = { viewModel.onDebuffToggled(it) },
+                            debuffs   = allDebuffs,
+                            onToggle  = { viewModel.onDebuffToggled(it) },
                             onDismiss = { viewModel.onDismissDialog() }
                         )
                     }
-
                     is StatusDialogState.QuestChecklist -> {
-                        val quest = if (dialog.isDaily) data.dailyQuest else data.mainQuest
+                        val quest  = if (dialog.isDaily) data.dailyQuest else data.mainQuest
                         val accent = if (dialog.isDaily) NeonCyan else NeonGold
                         quest?.let {
                             QuestChecklistSheet(
-                                quest = it,
-                                accentColor = accent,
+                                quest        = it,
+                                accentColor  = accent,
                                 onTaskToggle = { task ->
-                                    viewModel.onTaskToggled(
-                                        task,
-                                        dialog.questId
-                                    )
+                                    viewModel.onTaskToggled(task, dialog.questId)
                                 },
-                                onDismiss = { viewModel.onDismissDialog() }
+                                onDismiss    = { viewModel.onDismissDialog() }
                             )
                         }
                     }
-
                     StatusDialogState.None -> Unit
                 }
             }
 
             is UiState.Error -> {
                 Box(
-                    modifier = Modifier.fillMaxWidth().height(200.dp),
+                    modifier         = Modifier.fillMaxWidth().height(200.dp),
                     contentAlignment = Alignment.Center
                 ) {
                     Text(
@@ -167,5 +167,20 @@ fun StatusScreen(
                 }
             }
         }
+    }
+
+    // ── Global One-off Dialogs ────────────────────────────────────────
+    levelUpEvent?.let { event ->
+        LevelUpDialog(
+            newClass  = event.newClass,
+            newMonth  = event.newMonth,
+            onDismiss = { levelUpEvent = null }
+        )
+    }
+    if (showPenaltyOn) {
+        PenaltyActivatedDialog(onDismiss = { showPenaltyOn = false })
+    }
+    if (showPenaltyOff) {
+        PenaltyDeactivatedDialog(onDismiss = { showPenaltyOff = false })
     }
 }

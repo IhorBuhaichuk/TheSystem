@@ -13,9 +13,13 @@ import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 sealed class ModeDialogState {
-    object None                          : ModeDialogState()
-    object ConfirmAdvance                : ModeDialogState()
-    data class EditSchedule(val day: Int): ModeDialogState()
+    object None                           : ModeDialogState()
+    object ConfirmAdvance                 : ModeDialogState()
+    data class EditSchedule(val day: Int) : ModeDialogState()
+}
+
+sealed class ModeEvent {
+    object DayAdvanced : ModeEvent()
 }
 
 @HiltViewModel
@@ -28,7 +32,6 @@ class ModeViewModel @Inject constructor(
     val uiState: StateFlow<UiState<ModeUiData>> = playerRepo.getPlayer()
         .filterNotNull()
         .flatMapLatest { player ->
-            // Завантажуємо дані для всіх 4 днів паралельно
             combine(
                 scheduleRepo.getScheduleForDay(1),
                 scheduleRepo.getScheduleForDay(2),
@@ -37,7 +40,6 @@ class ModeViewModel @Inject constructor(
             ) { d1, d2, d3, d4 ->
                 val allDays = listOf(d1, d2, d3, d4)
                 val current = allDays.getOrNull(player.currentCycleDay - 1)
-
                 ModeUiData(
                     currentCycleDay = player.currentCycleDay,
                     isPenaltyActive = player.isPenaltyActive,
@@ -62,14 +64,18 @@ class ModeViewModel @Inject constructor(
     private val _dialogState = MutableStateFlow<ModeDialogState>(ModeDialogState.None)
     val dialogState: StateFlow<ModeDialogState> = _dialogState.asStateFlow()
 
-    fun onNextDayTap()             { _dialogState.value = ModeDialogState.ConfirmAdvance }
-    fun onEditScheduleTap(day: Int){ _dialogState.value = ModeDialogState.EditSchedule(day) }
-    fun onDismissDialog()          { _dialogState.value = ModeDialogState.None }
+    private val _events = MutableSharedFlow<ModeEvent>()
+    val events = _events.asSharedFlow()
+
+    fun onNextDayTap()              { _dialogState.value = ModeDialogState.ConfirmAdvance }
+    fun onEditScheduleTap(day: Int) { _dialogState.value = ModeDialogState.EditSchedule(day) }
+    fun onDismissDialog()           { _dialogState.value = ModeDialogState.None }
 
     fun onConfirmAdvance() {
         viewModelScope.launch {
             advanceCycleDay()
             onDismissDialog()
+            _events.emit(ModeEvent.DayAdvanced)
         }
     }
 
@@ -77,6 +83,7 @@ class ModeViewModel @Inject constructor(
         viewModelScope.launch {
             advanceCycleDay(forceComplete = true)
             onDismissDialog()
+            _events.emit(ModeEvent.DayAdvanced)
         }
     }
 }
@@ -84,11 +91,11 @@ class ModeViewModel @Inject constructor(
 // ── Mappers ───────────────────────────────────────────────────────────────────
 private fun ScheduleDay.toCycleDayUiModel(dayNum: Int, isActive: Boolean) =
     CycleDayUiModel(
-        dayNumber    = dayNum,
-        label        = "ДЕНЬ $dayNum",
-        type         = if (workoutTemplateId != null) DayType.WORKOUT else DayType.REST,
-        isActive     = isActive,
-        workoutName  = workoutTemplateName
+        dayNumber   = dayNum,
+        label       = "ДЕНЬ $dayNum",
+        type        = if (workoutTemplateId != null) DayType.WORKOUT else DayType.REST,
+        isActive    = isActive,
+        workoutName = workoutTemplateName
     )
 
 private fun ScheduleDay.toActiveDayUiModel(): ActiveDayUiModel {
@@ -99,10 +106,10 @@ private fun ScheduleDay.toActiveDayUiModel(): ActiveDayUiModel {
         4 to null
     )
     return ActiveDayUiModel(
-        dayNumber    = cycleDay,
-        debuffName   = debuffLabels[cycleDay],
-        dailyTasks   = dailyTaskNames.map { ActiveTaskUiModel(name = it) },
-        workoutName  = workoutTemplateName,
-        exercises    = exerciseNames
+        dayNumber   = cycleDay,
+        debuffName  = debuffLabels[cycleDay],
+        dailyTasks  = dailyTaskNames.map { ActiveTaskUiModel(name = it) },
+        workoutName = workoutTemplateName,
+        exercises   = exerciseNames
     )
 }
