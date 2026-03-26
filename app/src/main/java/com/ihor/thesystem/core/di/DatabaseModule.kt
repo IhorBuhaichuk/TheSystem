@@ -24,7 +24,6 @@ object DatabaseModule {
     @Provides
     @Singleton
     fun provideDatabase(@ApplicationContext context: Context): AppDatabase {
-        // Локальна змінна для уникнення Dagger Dependency Cycle та Kotlin closure errors
         var db: AppDatabase? = null
 
         val callback = object : RoomDatabase.Callback() {
@@ -51,10 +50,9 @@ object DatabaseModule {
             "the_system_db"
         )
             .addCallback(callback)
-            .fallbackToDestructiveMigration()
+            .addMigrations(AppDatabase.MIGRATION_2_3)
             .build()
 
-        // Привласнення екземпляра після білда, але до виконання onCreate
         db = database
         return database
     }

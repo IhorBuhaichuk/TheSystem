@@ -6,6 +6,7 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.AutoAwesome
 import androidx.compose.material.icons.filled.FitnessCenter
 import androidx.compose.material.icons.filled.Home
 import androidx.compose.material.icons.filled.Person
@@ -66,6 +67,17 @@ fun SystemBottomNavBar(navController: NavHostController) {
                 modifier   = Modifier.weight(1f),
                 onClick    = {
                     navController.navigate(Routes.Statistics.route) {
+                        popUpTo(Routes.Status.route) { inclusive = false }
+                        launchSingleTop = true
+                    }
+                }
+            )
+            NavIconButton(
+                icon       = Icons.Filled.AutoAwesome,
+                isSelected = currentRoute == Routes.Architect.route,
+                modifier   = Modifier.weight(1f),
+                onClick    = {
+                    navController.navigate(Routes.Architect.route) {
                         popUpTo(Routes.Status.route) { inclusive = false }
                         launchSingleTop = true
                     }
