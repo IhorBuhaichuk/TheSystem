@@ -12,20 +12,20 @@ import com.ihor.thesystem.domain.repository.DailyTonnageStats
 import kotlinx.coroutines.flow.Flow
 
 @Dao
-interface WorkoutAnalyticsDao {
+abstract class WorkoutAnalyticsDao {
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
-    suspend fun insertSession(session: WorkoutSessionEntity): Long
+    abstract suspend fun insertSession(session: WorkoutSessionEntity): Long
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
-    suspend fun insertSets(sets: List<ExerciseSetEntity>)
+    abstract suspend fun insertSets(sets: List<ExerciseSetEntity>)
 
     /**
      * Зберігає нові директиви. Якщо для конкретної вправи вже є директива,
      * вона буде замінена новою завдяки OnConflictStrategy.REPLACE.
      */
     @Insert(onConflict = OnConflictStrategy.REPLACE)
-    suspend fun insertOrReplaceDirectives(directives: List<WorkoutDirectiveEntity>)
+    abstract suspend fun insertOrReplaceDirectives(directives: List<WorkoutDirectiveEntity>)
 
     /**
      * Виконує збереження сесії та всіх її підходів як єдину неподільну операцію (транзакцію).
@@ -33,7 +33,7 @@ interface WorkoutAnalyticsDao {
      * що захищає базу від "битих" або неповних даних.
      */
     @Transaction
-    suspend fun saveSessionWithSets(session: WorkoutSessionEntity, sets: List<ExerciseSetEntity>): Long {
+    open suspend fun saveSessionWithSets(session: WorkoutSessionEntity, sets: List<ExerciseSetEntity>): Long {
         val sessionId = insertSession(session)
         // Прив'язуємо кожен підхід до щойно створеної сесії
         val setsWithSessionId = sets.map { it.copy(sessionId = sessionId) }
@@ -54,5 +54,5 @@ interface WorkoutAnalyticsDao {
         GROUP BY date(timestamp / 1000, 'unixepoch')
         ORDER BY dateUnixTimestamp ASC
     """)
-    fun getDailyTonnageStatsForMonth(monthStart: Long, monthEnd: Long): Flow<List<DailyTonnageStats>>
+    abstract fun getDailyTonnageStatsForMonth(monthStart: Long, monthEnd: Long): Flow<List<DailyTonnageStats>>
 }
