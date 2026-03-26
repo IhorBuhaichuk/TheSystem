@@ -68,4 +68,5 @@ object DatabaseModule {
     @Provides fun provideProgressionMatrixDao(db: AppDatabase) = db.progressionMatrixDao()
     @Provides fun provideDebuffConfigDao(db: AppDatabase)      = db.debuffConfigDao()
     @Provides fun provideQuestLogDao(db: AppDatabase)          = db.questLogDao()
+    @Provides fun provideWorkoutAnalyticsDao(db: AppDatabase)  = db.workoutAnalyticsDao()
 }
