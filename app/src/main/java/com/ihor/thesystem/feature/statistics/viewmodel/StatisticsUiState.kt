@@ -1,5 +1,7 @@
 package com.ihor.thesystem.feature.statistics.viewmodel
 
+import com.ihor.thesystem.domain.repository.DailyTonnageStats
+
 data class StatisticsUiData(
     val playerName: String                      = "",
     val playerClass: String                     = "",
@@ -7,7 +9,8 @@ data class StatisticsUiData(
     val currentWeek: Int                        = 1,
     val currentCycleDay: Int                    = 1,
     val isPenaltyActive: Boolean                = false,
-    val matrixEntries: List<MatrixEntryUiModel> = emptyList()
+    val matrixEntries: List<MatrixEntryUiModel> = emptyList(),
+    val tonnageStats: List<DailyTonnageStats>   = emptyList()
 )
 
 data class MatrixEntryUiModel(
