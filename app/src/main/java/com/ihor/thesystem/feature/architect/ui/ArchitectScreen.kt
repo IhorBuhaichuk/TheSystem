@@ -6,6 +6,7 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
@@ -17,7 +18,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.ihor.thesystem.core.ui.components.GlitchText
-import com.ihor.thesystem.core.ui.components.neonBorder
+import com.ihor.thesystem.core.ui.components.sciPanel
 import com.ihor.thesystem.feature.architect.viewmodel.ArchitectUiState
 import com.ihor.thesystem.feature.architect.viewmodel.ArchitectViewModel
 
@@ -44,7 +45,10 @@ fun ArchitectScreen(
             }
             is ArchitectUiState.Error -> {
                 Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                    GlitchText(text = "ПОМИЛКА СИСТЕМИ")
+                    GlitchText(
+                        text = "ПОМИЛКА СИСТЕМИ",
+                        style = MaterialTheme.typography.headlineMedium
+                    )
                     Spacer(modifier = Modifier.height(16.dp))
                     Text(text = state.message, color = neonRed, fontWeight = FontWeight.Bold)
                 }
@@ -53,7 +57,10 @@ fun ArchitectScreen(
                 val report = state.data
 
                 Column(modifier = Modifier.fillMaxSize()) {
-                    GlitchText(text = "ЗВІТ АРХІТЕКТОРА")
+                    GlitchText(
+                        text = "ЗВІТ АРХІТЕКТОРА",
+                        style = MaterialTheme.typography.headlineMedium
+                    )
                     Spacer(modifier = Modifier.height(16.dp))
 
                     if (report.isFallback) {
@@ -83,8 +90,7 @@ fun ArchitectScreen(
                             Column(
                                 modifier = Modifier
                                     .fillMaxWidth()
-                                    // Використовуємо існуючий кастомний модифікатор з NeonModifiers.kt
-                                    .neonBorder(color = neonCyan)
+                                    .sciPanel(borderColor = neonCyan, backgroundColor = Color.Transparent)
                                     .padding(16.dp)
                             ) {
                                 Text(text = "ID ВПРАВИ: ${directive.exerciseId}", color = neonCyan, fontWeight = FontWeight.Bold)
